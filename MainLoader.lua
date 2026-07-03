@@ -1,4 +1,4 @@
-local baseUrl = "https://raw.githubusercontent.com/你的GitHub帳號/你的Repo/main/"
+local baseUrl = "https://raw.githubusercontent.com/yanandhuang09190217-ctrl/BF-Script-2/main/"
 local modules = {
     "AhKaiUtils",
     "AhKaiCore",
