@@ -1,26 +1,18 @@
--- AhKaiUI.lua
 local Utils = _G.AhKaiUtils
 local Core = _G.AhKaiCore
 local Fruit = _G.AhKaiFruit
-
 local UI = {}
 _G.AhKaiUI = UI
-
--- 開機動畫 (科技+駭客+RGB 方格文字)
 local function ShowIntro()
     local screen = Instance.new("ScreenGui")
     screen.Name = "AhKaiIntro"
     screen.Parent = Utils.Services.CoreGui
     screen.ResetOnSpawn = false
-
-    -- RGB 背景
     local bg = Instance.new("Frame")
     bg.Size = UDim2.fromScale(1,1)
     bg.BackgroundColor3 = Color3.fromRGB(0,0,0)
     bg.BackgroundTransparency = 0.9
     bg.Parent = screen
-
-    -- 方格文字 "AhKai" (用多個 TextLabel 模擬)
     local text = "AhKai"
     local letters = {}
     local startX = 0.3
@@ -31,11 +23,10 @@ local function ShowIntro()
         letter.BackgroundTransparency = 1
         letter.Text = text:sub(i,i)
         letter.TextSize = 40
-        letter.Font = Enum.Font.Code -- 駭客字體
+        letter.Font = Enum.Font.Code
         letter.TextColor3 = Color3.fromRGB(math.random(255),math.random(255),math.random(255))
         letter.Parent = bg
         table.insert(letters, letter)
-        -- 彩色閃爍
         task.spawn(function()
             while bg.Parent do
                 letter.TextColor3 = Color3.fromRGB(math.random(255),math.random(255),math.random(255))
@@ -43,8 +34,6 @@ local function ShowIntro()
             end
         end)
     end
-
-    -- 掃描線效果
     local line = Instance.new("Frame")
     line.Size = UDim2.new(1,0,0,2)
     line.BackgroundColor3 = Color3.fromRGB(0,255,0)
@@ -56,22 +45,16 @@ local function ShowIntro()
             task.wait(0.05)
         end
     end)
-
-    -- 3秒後結束
     task.delay(3, function()
         screen:Destroy()
         UI:CreateMainPanel()
     end)
 end
-
--- 主面板 (高質感科技風)
 function UI:CreateMainPanel()
     local screen = Instance.new("ScreenGui")
     screen.Name = "AhKaiMain"
     screen.Parent = Utils.Services.CoreGui
     screen.ResetOnSpawn = false
-
-    -- 主框架
     local main = Instance.new("Frame")
     main.Size = UDim2.fromOffset(330, 520)
     main.Position = UDim2.new(-0.35, 0, 0.5, -260)
@@ -81,8 +64,6 @@ function UI:CreateMainPanel()
     main.Draggable = true
     Instance.new("UICorner", main).CornerRadius = UDim.new(0,12)
     main.Parent = screen
-
-    -- RGB 邊框發光
     local glow = Instance.new("ImageLabel")
     glow.Image = "rbxassetid://5028857084"
     glow.Size = UDim2.new(1, 30, 1, 30)
@@ -93,8 +74,6 @@ function UI:CreateMainPanel()
     glow.ScaleType = Enum.ScaleType.Slice
     glow.SliceCenter = Rect.new(10,10,118,118)
     glow.Parent = main
-
-    -- 標題
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1,-10,0,30)
     title.Position = UDim2.new(0,5,0,5)
@@ -104,8 +83,6 @@ function UI:CreateMainPanel()
     title.Font = Enum.Font.Code
     title.TextSize = 16
     title.Parent = main
-
-    -- 關閉按鈕
     local close = Instance.new("TextButton")
     close.Size = UDim2.fromOffset(24,24)
     close.Position = UDim2.new(1,-30,0,4)
@@ -121,8 +98,6 @@ function UI:CreateMainPanel()
         Fruit.StopRain()
         screen:Destroy()
     end)
-
-    -- 縮小成貓貓 Logo
     local minimized = false
     local catLogo
     local function MinimizeToggle()
@@ -134,7 +109,22 @@ function UI:CreateMainPanel()
                 catLogo.Size = UDim2.fromOffset(50,50)
                 catLogo.Position = UDim2.new(0, 10, 0, 10)
                 catLogo.BackgroundTransparency = 1
-                catLogo.Image = "rbxassetid://1234567890" -- 替換成貓貓圖
+                if minimized then
+                    if not catLogo then
+                        catLogo = Instance.new("TextButton")
+                        catLogo.Size = UDim2.fromOffset(50, 50)
+                        catLogo.Position = UDim2.new(0, 10, 0, 10)
+                        catLogo.BackgroundTransparency = 1
+                        catLogo.Text = "🐱"
+                        catLogo.TextSize = 40
+                        catLogo.Font = Enum.Font.GothamBold
+                        catLogo.Active = true
+                        catLogo.Draggable = true
+                        catLogo.Parent = screen
+                        catLogo.MouseButton1Click:Connect(MinimizeToggle)
+                    else
+                        catLogo.Visible = true
+                    end
                 catLogo.Active = true
                 catLogo.Draggable = true
                 catLogo.Parent = screen
@@ -146,8 +136,6 @@ function UI:CreateMainPanel()
             if catLogo then catLogo.Visible = false end
         end
     end
-
-    -- 內容滾動區
     local scroll = Instance.new("ScrollingFrame")
     scroll.Size = UDim2.new(1,-10,1,-45)
     scroll.Position = UDim2.new(0,5,0,40)
@@ -155,11 +143,8 @@ function UI:CreateMainPanel()
     scroll.CanvasSize = UDim2.new(0,0,0,700)
     scroll.ScrollBarThickness = 3
     scroll.Parent = main
-
     local list = Instance.new("UIListLayout", scroll)
     list.Padding = UDim.new(0,6)
-
-    -- 輔助函數: 駭客風開關
     local function MakeToggle(name, default, callback)
         local f = Instance.new("Frame")
         f.Size = UDim2.new(1,0,0,38)
@@ -196,8 +181,6 @@ function UI:CreateMainPanel()
         f.Parent = scroll
         return {Set = function(v) on = v; upd() end}
     end
-
-    -- 各功能開關
     MakeToggle("自動接取任務", false, function(on) Core.State.AutoQuest = on end)
     MakeToggle("自動跑圖", false, function(on) Core.State.AutoRun = on end)
     MakeToggle("自動刷怪", false, function(on) Core.State.AutoFarm = on end)
@@ -205,8 +188,6 @@ function UI:CreateMainPanel()
     MakeToggle("果實雨", false, function(on)
         if on then Fruit.StartRain() else Fruit.StopRain() end
     end)
-
-    -- 攻擊風格選擇
     local styleFrame = Instance.new("Frame")
     styleFrame.Size = UDim2.new(1,0,0,40)
     styleFrame.BackgroundColor3 = Color3.fromRGB(20,20,30)
@@ -238,8 +219,6 @@ function UI:CreateMainPanel()
         Utils.Debug("切換攻擊風格: "..styles[styleIndex])
     end)
     styleFrame.Parent = scroll
-
-    -- Debug 訊息面板
     local debugFrame = Instance.new("Frame")
     debugFrame.Size = UDim2.new(1,0,0,100)
     debugFrame.BackgroundColor3 = Color3.fromRGB(5,5,10)
@@ -257,8 +236,6 @@ function UI:CreateMainPanel()
     debugLabel.TextYAlignment = Enum.TextYAlignment.Top
     debugLabel.Parent = debugFrame
     debugFrame.Parent = scroll
-
-    -- 更新 Debug 訊息
     task.spawn(function()
         while debugLabel.Parent do
             local msg = _G.AhKaiDebug and _G.AhKaiDebug.Messages or {}
@@ -266,8 +243,6 @@ function UI:CreateMainPanel()
             task.wait(0.5)
         end
     end)
-
-    -- 縮小按鈕
     local minBtn = Instance.new("TextButton")
     minBtn.Size = UDim2.fromOffset(24,24)
     minBtn.Position = UDim2.new(1,-60,0,4)
@@ -279,14 +254,9 @@ function UI:CreateMainPanel()
     Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0,6)
     minBtn.Parent = main
     minBtn.MouseButton1Click:Connect(MinimizeToggle)
-
-    -- 滑入動畫
     Utils.Services.TweenService:Create(main, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {Position = UDim2.new(0.01,0,0.5,-260)}):Play()
-
     Core.StartLoops()
 end
-
--- 啟動
 ShowIntro()
 
 return UI
