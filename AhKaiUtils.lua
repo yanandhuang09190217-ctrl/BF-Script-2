@@ -1,8 +1,6 @@
--- AhKaiUtils.lua
 local Utils = {}
 _G.AhKaiUtils = Utils
 
--- 服務
 Utils.Services = {
     Players = game:GetService("Players"),
     RunService = game:GetService("RunService"),
@@ -16,13 +14,9 @@ Utils.Services = {
 }
 Utils.LocalPlayer = Utils.Services.Players.LocalPlayer
 Utils.Mouse = Utils.LocalPlayer:GetMouse()
-
--- 安全調用
 function Utils.Safe(fn, ...)
     return pcall(fn, ...)
 end
-
--- 快速獲取角色部件
 function Utils.GetChar()
     return Utils.LocalPlayer.Character
 end
@@ -34,12 +28,11 @@ function Utils.GetHRP()
     local c = Utils.GetChar()
     return c and c:FindFirstChild("HumanoidRootPart")
 end
-
--- 全域 Debug 系統 (UI 會自動抓取)
 _G.AhKaiDebug = {
     Messages = {},
     Max = 5
 }
+
 function Utils.Debug(msg, isError)
     local text = (isError and "❌ " or "✅ ") .. os.date("%X") .. " " .. msg
     table.insert(_G.AhKaiDebug.Messages, 1, text)
@@ -49,11 +42,11 @@ function Utils.Debug(msg, isError)
     print(text)
 end
 
--- 自動偵測攻擊遠端
 Utils.AttackRemotes = {}
+
 function Utils.ScanAttackRemotes()
     table.clear(Utils.AttackRemotes)
-    local keywords = {"attack", "melee", "sword", "fruit", "combat", "hit", "damage"}
+    local keywords = {"attack", "melee", "sword", "fruit", "combat", "hit", "damage", "main", "event"}
     for _, v in ipairs(Utils.Services.ReplicatedStorage:GetDescendants()) do
         if v:IsA("RemoteEvent") then
             local name = v.Name:lower()
@@ -65,8 +58,16 @@ function Utils.ScanAttackRemotes()
             end
         end
     end
+    local extraNames = {"MainEvent", "CombatEvent", "AttackEvent", "RemoteEvent"}
+    for _, exactName in ipairs(extraNames) do
+        local ev = Utils.Services.ReplicatedStorage:FindFirstChild(exactName)
+        if ev and ev:IsA("RemoteEvent") and not table.find(Utils.AttackRemotes, ev) then
+            table.insert(Utils.AttackRemotes, ev)
+        end
+    end
     Utils.Debug("偵測到 "..#Utils.AttackRemotes.." 個攻擊遠端")
 end
+
 Utils.ScanAttackRemotes()
 
 function Utils.TryAttack(target)
